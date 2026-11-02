@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Find student{% endblock %}
+{% block content %}
+<h1>Find a student</h1>
+<section class="card">
+  <form method="get" class="form-row">
+    <label>Search by name or roll number
+      <input name="q" value="{{ q }}" maxlength="100" placeholder="for example R001 or Asha" autofocus>
+    </label>
+    <button class="btn">Search</button>
+  </form>
+  <p class="muted">Or choose from the list:</p>
+  <form method="get" class="form-row">
+    <label>Student
+      <select name="student_id" required>
+        <option value="">Choose...</option>
+        {% for s in students %}<option value="{{ s.student_id }}">{{ s.roll_no }} - {{ s.name }}</option>{% endfor %}
+      </select>
+    </label>
+    <button class="btn">Show profile</button>
+  </form>
+</section>
+{% if q %}
+<section class="card">
+  <h2>Search results for "{{ q }}"</h2>
+  {% if matches %}
+  <div class="table-wrap"><table>
+    <tr><th>Roll no</th><th>Name</th><th>Section</th><th></th></tr>
+    {% for m in matches %}
+    <tr><td>{{ m.roll_no }}</td><td>{{ m.name }}</td><td>{{ m.section }}</td>
+        <td><a class="btn small" href="{{ url_for('web.student_profile_page', student_id=m.student_id) }}">View profile</a></td></tr>
+    {% endfor %}
+  </table></div>
+  {% else %}<p class="muted">No student matches that name or roll number.</p>{% endif %}
+</section>
+{% endif %}
+{% endblock %}

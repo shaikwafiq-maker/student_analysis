@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Subjects{% endblock %}
+{% block content %}
+<h1>Subjects</h1>
+<section class="card">
+  <h2>Add a subject</h2>
+  <form method="post" action="{{ url_for('web.add_subject') }}" class="form-row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Subject name<input name="subject_name" maxlength="100" required></label>
+    <label>Maximum marks<input type="number" name="max_marks" min="1" max="999" value="100" required></label>
+    <label>Pass marks<input type="number" name="pass_marks" min="0" max="999" value="35" required></label>
+    <button class="btn">Add subject</button>
+  </form>
+</section>
+<section class="card">
+  <h2>All subjects ({{ subjects|length }})</h2>
+  {% if subjects %}
+  <div class="table-wrap"><table>
+    <tr><th>Subject</th><th>Maximum marks</th><th>Pass marks</th><th>Actions</th></tr>
+    {% for s in subjects %}
+    <tr>
+      <td>{{ s.subject_name }}</td><td>{{ s.max_marks }}</td><td>{{ s.pass_marks }}</td>
+      <td class="actions">
+        <form method="post" action="{{ url_for('web.delete_subject', subject_id=s.subject_id) }}"
+              onsubmit="return confirm('Delete this subject and all marks recorded for it?')">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn small danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table></div>
+  {% else %}<p class="muted">No subjects yet.</p>{% endif %}
+</section>
+{% endblock %}

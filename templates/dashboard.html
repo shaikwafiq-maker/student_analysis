@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block scripts %}{% if chart_data %}{% include "_chart_loader.html" %}{% endif %}{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+<div class="stats">
+  <div class="stat"><span>{{ counts.students }}</span>Students</div>
+  <div class="stat"><span>{{ counts.subjects }}</span>Subjects</div>
+  <div class="stat"><span>{{ counts.marks }}</span>Mark records</div>
+  {% if overview %}
+  <div class="stat"><span>{{ overview.pass_percentage }}%</span>Pass rate</div>
+  <div class="stat"><span>{{ overview.class_average_percentage }}%</span>Class average</div>
+  {% endif %}
+</div>
+
+{% if not overview %}
+<section class="card">
+  <p>No marks yet. Add students, subjects and marks, or <a href="{{ url_for('web.upload') }}">upload a CSV file</a>.</p>
+</section>
+{% else %}
+<div class="two-col">
+  <section class="card"><h2>Grade distribution</h2><div class="chart-box"><canvas id="chartGrades"></canvas></div></section>
+  <section class="card"><h2>Average marks by subject</h2><div class="chart-box"><canvas id="chartSubjects"></canvas></div></section>
+</div>
+<div class="two-col">
+  <section class="card">
+    <h2>Top students</h2>
+    {% if toppers %}
+    <div class="table-wrap"><table>
+      <tr><th>Rank</th><th>Roll no</th><th>Name</th><th>%</th><th>Grade</th></tr>
+      {% for t in toppers %}
+      <tr><td>{{ t.rank }}</td><td>{{ t.roll_no }}</td><td>{{ t.name }}</td><td>{{ t.percentage }}</td><td>{{ t.grade }}</td></tr>
+      {% endfor %}
+    </table></div>
+    {% else %}<p class="muted">No student has passed every subject yet.</p>{% endif %}
+  </section>
+  <section class="card">
+    <h2>Needs support</h2>
+    {% if needs %}
+    <div class="table-wrap"><table>
+      <tr><th>Roll no</th><th>Name</th><th>%</th><th>Failed in</th></tr>
+      {% for n in needs %}
+      <tr><td>{{ n.roll_no }}</td><td>{{ n.name }}</td><td>{{ n.percentage }}</td><td>{{ n.failed_in }}</td></tr>
+      {% endfor %}
+    </table></div>
+    {% else %}<p class="muted">Everyone is doing well.</p>{% endif %}
+  </section>
+  <section class="card">
+    <h2>Performance drops</h2>
+    {% if drops %}
+    <div class="table-wrap"><table>
+      <tr><th>Roll no</th><th>Name</th><th>Change</th><th>Fell in</th></tr>
+      {% for r in drops %}
+      <tr><td>{{ r.roll_no }}</td><td>{{ r.name }}</td><td>{{ '%+g' % r.change }}</td><td>{{ r.fell_in }}</td></tr>
+      {% endfor %}
+    </table></div>
+    <p><a href="{{ url_for('web.trends') }}">See all trends</a></p>
+    {% else %}<p class="muted">No drops between the last two assessments. <a href="{{ url_for('web.trends') }}">Open trends</a></p>{% endif %}
+  </section>
+</div>
+{% endif %}
+{% endblock %}

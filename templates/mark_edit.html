@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Edit marks{% endblock %}
+{% block content %}
+<h1>Edit marks</h1>
+<section class="card">
+  <p><strong>{{ record.roll_no }} - {{ record.name }}</strong><br>
+     {{ record.subject_name }}, {{ record.assessment }}</p>
+  <form method="post" class="form-row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Marks obtained (maximum {{ record.max_marks }})
+      <input type="number" name="marks_obtained" min="0" max="{{ record.max_marks }}" step="0.01"
+             value="{{ '%g' % record.marks_obtained }}" required autofocus>
+    </label>
+    <button class="btn">Save changes</button>
+    <a class="btn secondary" href="{{ url_for('web.marks') }}">Cancel</a>
+  </form>
+</section>
+{% endblock %}

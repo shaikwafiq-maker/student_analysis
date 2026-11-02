@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Students{% endblock %}
+{% block content %}
+<h1>Students</h1>
+<section class="card">
+  <h2>Add a student</h2>
+  <form method="post" action="{{ url_for('web.add_student') }}" class="form-row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Roll number<input name="roll_no" maxlength="20" required></label>
+    <label>Name<input name="name" maxlength="100" required></label>
+    <label>Section<input name="section" maxlength="10" required></label>
+    <button class="btn">Add student</button>
+  </form>
+</section>
+<section class="card">
+  <h2>All students ({{ students|length }})</h2>
+  {% if students %}
+  <div class="table-wrap"><table>
+    <tr><th>Roll no</th><th>Name</th><th>Section</th><th>Actions</th></tr>
+    {% for s in students %}
+    <tr>
+      <td>{{ s.roll_no }}</td><td>{{ s.name }}</td><td>{{ s.section }}</td>
+      <td class="actions">
+        <a class="btn small" href="{{ url_for('web.student_profile_page', student_id=s.student_id) }}">View</a>
+        <a class="btn small secondary" href="{{ url_for('web.edit_student', student_id=s.student_id) }}">Edit</a>
+        <form method="post" action="{{ url_for('web.delete_student', student_id=s.student_id) }}"
+              onsubmit="return confirm('Delete this student and all of their marks?')">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn small danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table></div>
+  {% else %}<p class="muted">No students yet.</p>{% endif %}
+</section>
+{% endblock %}

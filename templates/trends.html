@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Trends{% endblock %}
+{% block content %}
+<h1>Performance trends</h1>
+<section class="card">
+  <p>Compares each student's latest assessment (for example Sem 3) with the one before it (Sem 2). Name your assessments <code>Sem 1</code>, <code>Sem 2</code>, <code>Sem 3</code> so they are compared in order.</p>
+  <form method="get" class="form-row">
+    <label>Flag a drop of at least (percentage points)
+      <input type="number" name="drop" min="1" max="100" step="1" value="{{ '%g' % drop }}">
+    </label>
+    <button class="btn">Update</button>
+  </form>
+</section>
+<section class="card">
+  {% if not rows %}
+  <p class="muted">No student has marks in two or more assessments yet.</p>
+  {% else %}
+  <h2>{{ dropped|length }} student(s) dropped by {{ '%g' % drop }} points or more</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Roll no</th><th>Name</th><th>Previous</th><th>Latest</th><th>Change</th><th>Status</th><th>Subjects that fell</th><th>History</th></tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.roll_no }}</td><td>{{ r.name }}</td>
+      <td>{{ r.from_assessment }}: {{ '%g' % r.previous_percentage }}%</td>
+      <td>{{ r.to_assessment }}: {{ '%g' % r.latest_percentage }}%</td>
+      <td>{{ '%+g' % r.change }}</td>
+      <td><span class="tag {{ 'fail' if r.status == 'Dropped' else 'pass' if r.status == 'Improved' else 'stable' }}">{{ r.status }}</span></td>
+      <td>{{ r.fell_in }}</td><td>{{ r.history }}</td>
+    </tr>
+    {% endfor %}
+  </table></div>
+  {% endif %}
+</section>
+{% endblock %}

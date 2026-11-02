@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Upload CSV{% endblock %}
+{% block content %}
+<h1>Upload marks from a CSV file</h1>
+<section class="card">
+  <h2>1. Prepare your file</h2>
+  <p>The first line must contain these column names, in any order:</p>
+  <p><code>{{ columns|join(', ') }}</code></p>
+  <ul>
+    <li>The subject must already exist (check the Subjects page). Spelling is not case-sensitive.</li>
+    <li>New students are created automatically from <code>roll_no</code>, <code>name</code> and <code>section</code>.</li>
+    <li>If marks already exist for the same student, subject and assessment, they are updated.</li>
+    <li>The whole file is checked first. If any row has a problem, nothing is saved.</li>
+  </ul>
+  <p><a href="{{ url_for('static', filename='sample_marks.csv') }}" download>Download a sample CSV</a></p>
+</section>
+<section class="card">
+  <h2>2. Upload it</h2>
+  <form method="post" enctype="multipart/form-data" class="form-row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>CSV file (up to 1 MB)<input type="file" name="file" accept=".csv" required></label>
+    <button class="btn">Upload and save</button>
+  </form>
+</section>
+
+{% if result %}
+<section class="card">
+  <h2>Result</h2>
+  {% if result.errors %}
+    <div class="flash error">Nothing was saved{% if result.error_count %}: {{ result.error_count }} row(s) have problems{% endif %}.</div>
+    <ul>{% for e in result.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    {% if result.error_count and result.error_count > result.errors|length %}
+      <p class="muted">Showing the first {{ result.errors|length }} problems. Fix these and upload again.</p>
+    {% endif %}
+  {% else %}
+    <div class="flash success">Upload complete: {{ result.rows }} row(s) processed.</div>
+    <ul>
+      <li>New students created: {{ result.students_created }}</li>
+      <li>New marks added: {{ result.added }}</li>
+      <li>Existing marks updated: {{ result.updated }}</li>
+      <li>Unchanged: {{ result.unchanged }}</li>
+    </ul>
+    <p><a class="btn secondary" href="{{ url_for('web.reports') }}">See the reports</a></p>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

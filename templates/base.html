@@ -1,0 +1,70 @@
+{% macro theme_button() -%}
+<button type="button" class="theme-toggle" aria-label="Switch between dark and light mode" title="Switch between dark and light mode">
+  <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
+{%- endmacro %}
+{% macro nav_item(label, target, endpoints, current) -%}
+<a href="{{ url_for(target) }}" class="{{ 'active' if current in endpoints else '' }}">{{ label }}</a>
+{%- endmacro %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    (function () {
+      var theme = null;
+      try { theme = localStorage.getItem("theme"); } catch (e) {}
+      if (!theme) { theme = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; }
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <title>{% block title %}Student Performance Analysis{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% set current = request.endpoint %}
+{% if session.get('teacher') %}
+<div class="shell">
+<aside class="sidebar">
+  <div class="sidebar-top">{{ theme_button() }}<div class="brand">Student Performance Analysis</div></div>
+  <nav>
+    {{ nav_item('Dashboard', 'web.dashboard', ['web.dashboard'], current) }}
+    {{ nav_item('Students', 'web.students', ['web.students', 'web.edit_student'], current) }}
+    {{ nav_item('Subjects', 'web.subjects', ['web.subjects'], current) }}
+    {{ nav_item('Marks', 'web.marks', ['web.marks', 'web.edit_mark'], current) }}
+    {{ nav_item('Trends', 'web.trends', ['web.trends'], current) }}
+    {{ nav_item('Upload CSV', 'web.upload', ['web.upload'], current) }}
+    {{ nav_item('Reports', 'web.reports', ['web.reports'], current) }}
+    {{ nav_item('Find student', 'web.find_student', ['web.find_student', 'web.student_profile_page'], current) }}
+  </nav>
+  <div class="sidebar-bottom">
+    <span class="who">Signed in as <strong>{{ session['teacher'] }}</strong></span>
+    <form method="post" action="{{ url_for('logout') }}" class="logout">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn small secondary">Log out</button>
+    </form>
+  </div>
+</aside>
+<div class="main-area">
+{% else %}
+<div class="theme-float">{{ theme_button() }}</div>
+<div class="main-area">
+{% endif %}
+<main class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+{% if session.get('teacher') %}<footer class="page-footer">Student Performance Analysis System &middot; Flask &middot; MySQL &middot; Pandas &middot; NumPy &middot; Matplotlib</footer>{% endif %}
+</div>
+{% if session.get('teacher') %}</div>{% endif %}
+<script src="{{ url_for('static', filename='theme.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

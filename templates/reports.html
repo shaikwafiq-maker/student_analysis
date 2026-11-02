@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<h1>Reports</h1>
+{% if empty %}
+<section class="card"><p>No marks yet, so there is nothing to analyze.</p></section>
+{% else %}
+<section class="card">
+  <h2>Student results</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Rank</th><th>Roll no</th><th>Name</th><th>Section</th><th>Total</th><th>%</th><th>Result</th><th>Grade</th></tr>
+    {% for s in summary %}
+    <tr>
+      <td>{{ s.rank }}</td><td>{{ s.roll_no }}</td><td>{{ s.name }}</td><td>{{ s.section }}</td>
+      <td>{{ '%g' % s.total }} / {{ '%g' % s.max_total }}</td><td>{{ s.percentage }}</td>
+      <td><span class="tag {{ 'pass' if s.result == 'Pass' else 'fail' }}">{{ s.result }}</span></td>
+      <td>{{ s.grade }}</td>
+    </tr>
+    {% endfor %}
+  </table></div>
+</section>
+<section class="card">
+  <h2>Subject statistics</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Subject</th><th>Students</th><th>Average</th><th>Highest</th><th>Lowest</th><th>Median</th><th>Std dev</th><th>Pass %</th></tr>
+    {% for s in subjects %}
+    <tr>
+      <td>{{ s.subject_name }}</td><td>{{ s.students }}</td><td>{{ s.average }}</td><td>{{ s.highest }}</td>
+      <td>{{ s.lowest }}</td><td>{{ s.median }}</td><td>{{ s.std_dev }}</td><td>{{ s.pass_percentage }}</td>
+    </tr>
+    {% endfor %}
+  </table></div>
+</section>
+<div class="two-col">
+  <section class="card"><h2>Average marks by subject</h2><div class="chart-box"><canvas id="chartSubjects"></canvas></div></section>
+  <section class="card"><h2>Pass percentage by subject</h2><div class="chart-box"><canvas id="chartPass"></canvas></div></section>
+  <section class="card"><h2>Grade distribution</h2><div class="chart-box"><canvas id="chartGrades"></canvas></div></section>
+  <section class="card"><h2>Percentage of each student</h2><div class="chart-box" id="studentBox"><canvas id="chartStudents"></canvas></div></section>
+</div>
+<section class="card">
+  <details>
+    <summary><strong>Saved chart images (Matplotlib)</strong></summary>
+    <div class="charts">
+      {% for name in charts %}
+      <img src="{{ url_for('analysis.show_chart', filename=name, v=stamp) }}" alt="{{ name.replace('_', ' ').replace('.png', '') }}">
+      {% endfor %}
+    </div>
+  </details>
+</section>
+{% endif %}
+{% endblock %}
+{% block scripts %}{% if chart_data %}{% include "_chart_loader.html" %}{% endif %}{% endblock %}

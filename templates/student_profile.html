@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ student.name }}{% endblock %}
+{% block content %}
+<h1>{{ student.name }}</h1>
+<p class="muted">Roll no {{ student.roll_no }} &middot; Section {{ student.section }}
+  &nbsp; <a href="{{ url_for('web.find_student') }}" class="no-print">Find another student</a>
+  &nbsp; <button class="btn small secondary no-print" onclick="window.print()">Print</button></p>
+
+{% if not profile %}
+<section class="card"><p>This student has no marks yet. <a href="{{ url_for('web.marks') }}">Add marks</a></p></section>
+{% else %}
+<div class="stats">
+  <div class="stat"><span>{{ profile.percentage }}%</span>Overall percentage</div>
+  <div class="stat"><span>{{ profile.grade }}</span>Grade</div>
+  <div class="stat"><span>{{ profile.rank }} / {{ profile.class_size }}</span>Class rank</div>
+  <div class="stat"><span>{{ '%g' % profile.total }} / {{ '%g' % profile.max_total }}</span>Total marks</div>
+  <div class="stat"><span><span class="tag {{ 'pass' if profile.result == 'Pass' else 'fail' }}">{{ profile.result }}</span></span>Result</div>
+</div>
+<section class="card">
+  <h2>All marks</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Subject</th><th>Out of</th>{% for a in profile.assessments %}<th>{{ a }}</th>{% endfor %}<th>Average</th></tr>
+    {% for row in profile.matrix %}
+    <tr>
+      <td><strong>{{ row.subject }}</strong></td><td>{{ '%g' % row.max_marks }}</td>
+      {% for c in row.cells %}
+        {% if c.marks is none %}<td class="muted">-</td>
+        {% else %}<td>{% if c.passed %}{{ '%g' % c.marks }}{% else %}<span class="tag fail">{{ '%g' % c.marks }}</span>{% endif %}</td>{% endif %}
+      {% endfor %}
+      <td>{{ row.average }}</td>
+    </tr>
+    {% endfor %}
+    <tr class="total-row"><td><strong>Total</strong></td><td></td>
+      {% for t in profile.totals %}<td><strong>{{ '%g' % t.total }} / {{ '%g' % t.max_total }}</strong></td>{% endfor %}<td></td></tr>
+    <tr class="total-row"><td><strong>Percentage</strong></td><td></td>
+      {% for t in profile.totals %}<td><strong>{{ t.percentage }}%</strong></td>{% endfor %}<td></td></tr>
+    <tr class="total-row"><td><strong>Result</strong></td><td></td>
+      {% for t in profile.totals %}<td><span class="tag {{ 'pass' if t.result == 'Pass' else 'fail' }}">{{ t.result }}</span></td>{% endfor %}<td></td></tr>
+  </table></div>
+  <p class="muted">A red mark means the student is below the pass marks in that subject.</p>
+</section>
+<section class="card">
+  <h2>Graph of every subject</h2>
+  <div class="charts"><img src="{{ profile.subject_chart }}" alt="Grouped bar chart of the student's marks in every subject for each assessment, with the class average"></div>
+</section>
+{% if profile.trend_chart %}
+<section class="card">
+  <h2>Progress across assessments</h2>
+  <div class="charts"><img src="{{ profile.trend_chart }}" alt="Line chart of the student's overall percentage in each assessment"></div>
+</section>
+{% endif %}
+{% endif %}
+{% endblock %}
